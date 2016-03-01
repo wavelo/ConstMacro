@@ -10,6 +10,10 @@
 <div>
 	{foreach $data as $key => [title:]}
 	<p>{$title}</p>
+		{foreach $data as $key => [title:]}
+		<p>{$title}</p>
+		{/foreach}
+	<p>{$title}</p>
 	{/foreach}
 </div>
 
