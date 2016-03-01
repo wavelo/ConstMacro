@@ -73,14 +73,16 @@ class ConstMacro extends MacroSet
 			(?P<iterator>.*)
 			\s+as\s+
 			(?P<key>\\$[a-z][a-z0-9_]*\s+=>\s+)?
-			(?P<const>\[.*\])
+			(?P<const>\[.*\])\s*
+			(,\s*(?P<props>\\$[a-z][a-z0-9_]*))?
 		\s*$#xsi', $node->args, $matches);
 
 		if (empty($result)) {
 			return self::$coreMacros->macroEndForeach($node, $writer);
 		}
 
-		$parser = Parser::parse("$matches[const] = " . ($uniqid = uniqid('$tmp_')));
+		$props = empty($matches['props']) ? uniqid('$tmp_') : $matches['props'];
+		$parser = Parser::parse("$matches[const] = $props");
 
 		$node->openingCode = $writer->write(
 			'<?php $_l->compacts[] = call_user_func_array("compact", %var) + %var;'
@@ -88,7 +90,7 @@ class ConstMacro extends MacroSet
 			. 'new Latte\Runtime\CachingIterator(%raw) as %raw %raw) { %raw ?>',
 			$parser->compact,
 			array_fill_keys($parser->compact, NULL),
-			$matches['iterator'], $matches['key'], $uniqid,
+			$matches['iterator'], $matches['key'], $props,
 			$parser->expr
 		);
 

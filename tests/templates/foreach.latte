@@ -17,8 +17,9 @@
 	{/foreach}
 </div>
 
-<div n:inner-foreach="$data as $key => [title:]">
+<div n:inner-foreach="$data as $key => [title:], $props">
 	<p>{$title}</p>
+	<p>{$props['title']}</p>
 </div>
 
 <div>
