@@ -1,0 +1,24 @@
+
+{default $data = [['title' => 'title #0'], ['title' => 'title #1'], ['title' => 'title #2']]}
+
+<div>
+	{foreach $data as [title:]}
+	<p>{$title}</p>
+	{/foreach}
+</div>
+
+<div>
+	{foreach $data as $key => [title:]}
+	<p>{$title}</p>
+	{/foreach}
+</div>
+
+<div n:inner-foreach="$data as $key => [title:]">
+	<p>{$title}</p>
+</div>
+
+<div>
+	{foreach $data as $key => $val}
+	<p>{$val[title]}</p>
+	{/foreach}
+</div>

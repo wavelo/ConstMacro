@@ -4,23 +4,29 @@ use Latte\Engine;
 use Latte\MacroNode;
 use Latte\PhpWriter;
 use Latte\Macros\MacroSet;
+use Latte\Macros\CoreMacros;
 use ConstMacro\Parser;
 
 
 /**
  * - {const ? /}
  * - {const ?}{/const}
- * - n:const="?"
+ * - {foreach ? => []}{/foreach}
  */
 class ConstMacro extends MacroSet
 {
+
+	/** @var Latte\Macros\ConstMacro */
+	private static $coreMacros;
 
 
 	public static function install(Engine $latte)
 	{
 		$me = new static($latte->getCompiler());
+		$me::$coreMacros = new CoreMacros($latte->getCompiler());
 
 		$me->addMacro('const', [$me, 'macroConst'], [$me, 'macroEndConst']);
+		$me->addMacro('foreach', NULL, [$me, 'macroEndForeach']);
 	}
 
 
@@ -55,6 +61,38 @@ class ConstMacro extends MacroSet
 		);
 
 		$node->closingCode .= "<?php extract(array_pop(\$_l->compacts)); ?>";
+	}
+
+
+	/**
+	 * {foreach ...}
+	 */
+	public function macroEndForeach(MacroNode $node, PhpWriter $writer)
+	{
+		$result = preg_match('#^\s*
+			(?P<iterator>.*)
+			\s+as\s+
+			(?P<key>\\$[a-z][a-z0-9_]*\s+=>\s+)?
+			(?P<const>\[.*\])
+		\s*$#xsi', $node->args, $matches);
+
+		if (empty($result)) {
+			return self::$coreMacros->macroEndForeach($node, $writer);
+		}
+
+		$parser = Parser::parse("$matches[const] = " . ($uniqid = uniqid('$tmp_')));
+
+		$node->openingCode = $writer->write(
+			'<?php $_l->compacts[] = call_user_func_array("compact", %var) + %var;'
+			. '$iterations = 0; foreach ($iterator = $_l->its[] = '
+			. 'new Latte\Runtime\CachingIterator(%raw) as %raw %raw) { %raw ?>',
+			$parser->compact,
+			array_fill_keys($parser->compact, NULL),
+			$matches['iterator'], $matches['key'], $uniqid,
+			$parser->expr
+		);
+
+		$node->closingCode = '<?php $iterations++; } extract(array_pop($_l->compacts)); array_pop($_l->its); $iterator = end($_l->its) ?>';
 	}
 
 }
