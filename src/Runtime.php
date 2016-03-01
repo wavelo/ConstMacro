@@ -13,19 +13,17 @@ class Runtime
 	 * @return array
 	 * @throws ConstMacro\RuntimeException
 	 **/
-	public static function toArray(array $tree, $props)
+	public static function toArray(array $tree, $original)
 	{
 		$rest = end($tree)===0;
-		$restIsObject = is_object($props);
-		$assoc = !is_array($props) || array_keys($props)!==range(0, count($props)-1);
-		$props = self::propsToArray($props, $rest);
-		$arrayLike = is_array($props) || $props instanceof \ArrayAccess;
+		$assoc = !is_array($original) || array_keys($original)!==range(0, count($original)-1);
+		$props = self::propsToArray($original, $rest);
 
 		$ret = [];
 		$index = 0;
 		foreach ($tree as $token) {
 			if ($token===0) {
-				$ret[] = $restIsObject ? (object) $props : ($assoc ? $props : array_values($props));
+				$ret[] = is_object($original) ? (object) $props : ($assoc ? $props : array_values($props));
 
 			} elseif (empty($token)) {
 				$key = $index++;
@@ -43,11 +41,14 @@ class Runtime
 					$key = $index++;
 				}
 
-				if ($arrayLike && isset($props[$key])) {
-					$value = $props[$key];
+				if ($original instanceof \ArrayAccess && isset($original[$key])) {
+					$value = $original[$key];
 
-				} elseif (is_object($props) && isset($props->$key)) {
-					$value = $props->$key;
+				} elseif (is_object($original) && isset($original->$key)) {
+					$value = $original->$key;
+
+				} elseif (is_array($props) && isset($props[$key])) {
+					$value = $props[$key];
 
 				} elseif (isset($token[2])) {
 					$value = self::value($token[2]);
@@ -60,8 +61,8 @@ class Runtime
 					$ret[] = $value;
 
 				} else {
-					foreach (self::toArray($token[1], $value) as $value) {
-						$ret[] = $value;
+					foreach (self::toArray($token[1], $value) as $val) {
+						$ret[] = $val;
 					}
 				}
 
