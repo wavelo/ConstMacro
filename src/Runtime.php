@@ -16,7 +16,7 @@ class Runtime
 	public static function toArray(array $tree, $props)
 	{
 		$rest = end($tree)===0;
-		$isObject = $props instanceof \stdClass;
+		$restIsObject = is_object($props);
 		$assoc = !is_array($props) || array_keys($props)!==range(0, count($props)-1);
 		$props = self::propsToArray($props, $rest);
 		$arrayLike = is_array($props) || $props instanceof \ArrayAccess;
@@ -25,7 +25,7 @@ class Runtime
 		$index = 0;
 		foreach ($tree as $token) {
 			if ($token===0) {
-				$ret[] = $isObject ? (object) $props : ($assoc ? $props : array_values($props));
+				$ret[] = $restIsObject ? (object) $props : ($assoc ? $props : array_values($props));
 
 			} elseif (empty($token)) {
 				$key = $index++;
