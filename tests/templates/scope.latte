@@ -1,0 +1,48 @@
+
+{default $title=>'title #0'}
+{default $props1=>['title'=>'title #1']}
+{default $props2=>['title'=>'title #2']}
+{default $props3=>[]}
+
+<div>
+	<p>{$title}</p>
+
+	{const [title:] = $props1}
+	<p>{$title}</p>
+	{/const}
+</div>
+
+<div>
+	<p>{$title}</p>
+
+	<div n:const="[title:] = $props1">
+		<p>{$title}</p>
+
+		{var title=>'title #3'}
+
+		<div>
+			{const [title:] = $props2}
+			<p>{$title}</p>
+			{/const}
+		</div>
+
+		<p>{$title}</p>
+	</div>
+</div>
+
+<div>
+	<p>{$title}</p>
+
+	{const [title:] = $props1 /}
+	<p>{$title}</p>
+</div>
+
+<div>
+	<p>{$title}</p>
+
+	<div>
+		{const [title:="title #4"] = $props3}
+		<p>{$title}</p>
+		{/const}
+	</div>
+</div>
