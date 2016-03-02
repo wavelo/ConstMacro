@@ -52,4 +52,4 @@ $props->data = ['a'=>1, 'b'=>1, 'c'=>2];
 Assert::equal(["a"=>1, "b"=>1, "c"=>2], evaluate("[a:,b:,c:]", $props));
 
 $props->data = ['a'=>1, 'b'=>1, 'c'=>2];
-Assert::equal(["a"=>1, 'b'=>1, "c"=>(object)["d"=>4]], evaluate("[a:, b:, ...c]", $props));
+Assert::equal(["a"=>1, 'b'=>1, "c"=>["d"=>4]], evaluate("[a:, b:, ...c]", $props));

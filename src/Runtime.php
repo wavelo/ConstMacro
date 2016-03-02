@@ -13,42 +13,38 @@ class Runtime
 	 * @return array
 	 * @throws ConstMacro\RuntimeException
 	 **/
-	public static function toArray(array $tree, $original)
+	public static function toArray(array $tree, $props)
 	{
-		$rest = end($tree)===0;
-		$assoc = !is_array($original) || array_keys($original)!==range(0, count($original)-1);
-		$props = self::propsToArray($original, $rest);
+		$isRest = end($tree)===0;
+		$rest = self::propsToArray($props, $isRest);
 
 		$ret = [];
 		$index = 0;
 		foreach ($tree as $token) {
 			if ($token===0) {
-				$ret[] = is_object($original) ? (object) $props : ($assoc ? $props : array_values($props));
+				if (is_array($props) && array_keys($props)===range(0, count($props)-1)) {
+					$ret[] = array_values($rest);
+
+				} else {
+					$ret[] = $rest;
+				}
+
+				$key = NULL;
 
 			} elseif (empty($token)) {
 				$key = $index++;
 
-				if ($rest) {
-					unset($props[$key]);
-				}
-
 			} else {
-				if ($token[0]!==0) {
-					$key = $token[0];
-					$assoc = TRUE;
+				$key = $token[0]===0 ? $index++ : $token[0];
 
-				} else {
-					$key = $index++;
-				}
-
-				if ($original instanceof \ArrayAccess && isset($original[$key])) {
-					$value = $original[$key];
-
-				} elseif (is_object($original) && isset($original->$key)) {
-					$value = $original->$key;
-
-				} elseif (is_array($props) && isset($props[$key])) {
+				if ($props instanceof \ArrayAccess && isset($props[$key])) {
 					$value = $props[$key];
+
+				} elseif (is_object($props) && isset($props->$key)) {
+					$value = $props->$key;
+
+				} elseif (is_array($rest) && isset($rest[$key])) {
+					$value = $rest[$key];
 
 				} elseif (isset($token[2])) {
 					$value = self::value($token[2]);
@@ -57,19 +53,22 @@ class Runtime
 					$value = NULL;
 				}
 
-				if ($token[1]===0) {
-					$ret[] = $value;
+				$value = $token[1]===0 ? [$value] : self::toArray($token[1], $value);
 
-				} else {
-					foreach (self::toArray($token[1], $value) as $val) {
-						$ret[] = $val;
-					}
-				}
-
-				if ($rest) {
-					unset($props[$key]);
+				foreach ($value as $val) {
+					$ret[] = $val;
 				}
 			}
+
+			if ($isRest && isset($key)) {
+				if (is_array($rest)) {
+					unset($rest[$key]);
+
+				} else {
+					unset($rest->$key);
+				}
+			}
+
 		}
 
 		return $ret;
@@ -98,33 +97,32 @@ class Runtime
 	/**
 	 * @param mixed
 	 * @param bool
-	 * @return array|Iterator|ArrayAccess
+	 * @return array|object
 	 * @throws ConstMacro\RuntimeException
 	 **/
 	private static function propsToArray($props, $need)
 	{
-		if (is_array($props)) {
+		if ($need && is_array($props)) {
 			return $props;
 
-		} elseif ($props instanceof \stdClass) {
-			return (array) $props;
+		} elseif ($need) {
+			if ($props instanceof \stdClass) {
+				return (object) (array) $props;
 
-		} elseif ($props instanceof \ArrayAccess && empty($need)) {
-			return $props;
+			} elseif ($props instanceof \Traversable) {
+				return iterator_to_array($props);
 
-		} elseif ($props instanceof \Traversable) {
-			return iterator_to_array($props);
+			} elseif ($vars = get_object_vars($props)) { // instanceof =
+				return (object) $vars;
+			}
 
-		} elseif (is_object($props) && empty($need)) {
+			throw new RuntimeException("Rest ...operator expects \$props to be array, Traversable object or object with public properties.");
+
+		} elseif (is_array($props) || is_object($props)) {
 			return $props;
 		}
 
-		if ($need) {
-			throw new RuntimeException("Rest ...operator expects \$props to be array or Traversable object.");
-
-		} else {
-			throw new RuntimeException("Invalid \$props given, expected array, Traversable or ArrayAccess.");
-		}
+		throw new RuntimeException("Invalid \$props given, expected array or object.");
 	}
 
 }
