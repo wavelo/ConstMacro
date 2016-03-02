@@ -72,16 +72,16 @@ class ConstMacro extends MacroSet
 		$result = preg_match('#^\s*
 			(?P<iterator>.*)
 			\s+as\s+
-			(?P<key>\\$[a-z][a-z0-9_]*\s+=>\s+)?
-			(?P<const>\[.*\])\s*
-			(,\s*(?P<props>\\$[a-z][a-z0-9_]*))?
+			(?P<key>\\$[a-z][a-z0-9_]*\s*=>\s*)?
+			((?P<props>\\$[a-z][a-z0-9_]*),\s*)?
+			(?P<const>\[.*\])
 		\s*$#xsi', $node->args, $matches);
 
 		if (empty($result)) {
 			return self::$coreMacros->macroEndForeach($node, $writer);
 		}
 
-		$props = empty($matches['props']) ? uniqid('$tmp_') : $matches['props'];
+		$props = $matches['props'] ?: uniqid('$tmp_');
 		$parser = Parser::parse("$matches[const] = $props");
 
 		$node->openingCode = $writer->write(
