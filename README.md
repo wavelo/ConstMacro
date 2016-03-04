@@ -81,17 +81,16 @@ For more examples see tests. Short demonstration:
 ##### Syntax examples:
 
 | destructuring | \$props | \$title equals |
-|---------------
- |  `[title:]`    |   `NULL`            | `RuntimeException`    |
-  | `[title:]`    |   `abc`             | `RuntimeException`    |
- |  `[title:]`    |   `[]`            | `NULL`    |
- |  `[title:=Hi]`   |   `[]`            | `"Hi"`    |
- |  `[title:]`    |   `["title" => "Hello"]`    | `"Hello"` |
- |  `[title=Hi]`  |   `[]`            | `"Hi"`    |
- |  `[title]`     |   `["title" => "Hello"]`    | `NULL`    |
- |  `[title]`     |   `["Hello"]`           |`"Hello"`  |
- |  `[title:]`    |   `["Hello"]`           |`NULL`   |
-|---------------
+| --- | --- | --- |
+| `[title:]` | `NULL` | `RuntimeException` |
+| `[title:]` | `abc` | `RuntimeException` |
+| `[title:]` | `[]` | `NULL` |
+| `[title:=Hi]` | `[]` | `"Hi"` |
+| `[title:]` | `["title" => "Hello"]` | `"Hello"` |
+| `[title=Hi]` | `[]` | `"Hi"` |
+| `[title]` | `["title" => "Hello"]` | `NULL` |
+| `[title]` | `["Hello"]` |`"Hello"` |
+| `[title:]` | `["Hello"]` |`NULL` |
 
 
 ##### Priority when retrieving values of object
