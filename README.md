@@ -8,7 +8,7 @@ Extends Latte templating engine with `{const ?}` macro for destructuring of obje
 Use composer:
 
 ```bash
-$ composer require aleskafka/const-macro
+$ composer require wavelo/const-macro
 ```
 
 Install in configuration file given Latte\Engine:

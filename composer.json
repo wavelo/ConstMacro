@@ -1,8 +1,8 @@
 {
-	"name": "aleskafka/const-macro",
+	"name": "wavelo/const-macro",
 	"type": "library",
-	"description": "",
-	"keywords": ["const macro", "destructuring", "es2015-like", "php", "rest operator"],
+	"description": "Extends Latte templating engine with `{const ?}` macro for destructuring of objects and arrays inspired by ES2015",
+	"keywords": ["const macro", "Latte", "destructuring", "es2015-like", "php", "rest operator"],
 	"license": "MIT",
 	"authors": [
 		{
@@ -10,7 +10,7 @@
 		}
 	],
 	"require": {
-		"php": ">=5.4",
+		"php": ">=5.5",
 		"latte/latte": "^2.0.0"
 	},
 	"require-dev": {
