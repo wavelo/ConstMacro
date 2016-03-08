@@ -15,7 +15,7 @@ Install in configuration file given Latte\Engine:
 
 ```php
 $latte = new Latte\Engine;
-ConstMacro::install($latte);
+ConstMacro::install($latte->getCompiler());
 ```
 
 When using Nette Dependency Injection, you can install in latte config.neon section:

@@ -55,7 +55,7 @@ function evaluate($__expr, $__props, array $__defined=[]) {
 function assertTemplate($name, array $props=[])
 {
 	$latte = new Latte\Engine;
-	ConstMacro::install($latte);
+	ConstMacro::install($latte->getCompiler());
 
 	$file = __DIR__ . "/templates/$name.expected.html";
 	$actual = $latte->renderToString(__DIR__ . "/templates/$name.latte", ['props' => $props]);
