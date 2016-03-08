@@ -1,6 +1,5 @@
 <?php
 
-use Latte\Engine;
 use Latte\MacroNode;
 use Latte\PhpWriter;
 use Latte\Macros\MacroSet;
@@ -20,10 +19,10 @@ class ConstMacro extends MacroSet
 	private static $coreMacros;
 
 
-	public static function install(Engine $latte)
+	public static function install(Latte\Compiler $compiler)
 	{
-		$me = new static($latte->getCompiler());
-		$me::$coreMacros = new CoreMacros($latte->getCompiler());
+		$me = new static($compiler);
+		$me::$coreMacros = new CoreMacros($compiler);
 
 		$me->addMacro('const', [$me, 'macroConst'], [$me, 'macroEndConst']);
 		$me->addMacro('foreach', NULL, [$me, 'macroEndForeach']);
