@@ -242,14 +242,9 @@ class Parser
 	{
 		$parser = ParserValue::parse($this->input);
 
-		if ($parser->value) {
-			$this->tree .= ",$parser->value";
-			$this->input = $parser->input;
-			$this->setContext($contextNext);
-
-		} else {
-			throw new ParserException('Malformed syntax: invalid default value');
-		}
+		$this->tree .= isset($parser->value) ? ",$parser->value" : ",NULL";
+		$this->input = $parser->input;
+		$this->setContext($contextNext);
 	}
 
 

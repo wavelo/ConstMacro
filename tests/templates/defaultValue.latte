@@ -1,0 +1,27 @@
+
+{const [title:='Title'] = $props /}
+{$title}
+
+{const [title:=''] = $props /}
+{$title}
+
+{const [title:=1] = $props /}
+{$title}
+
+{const [title:] = $props /}
+{$title?:'Title2'}
+
+{const [title:=0] = $props /}
+{$title}
+
+{const [title:=NULL] = $props /}
+{$title===NULL ? 'NULL' : '0'}
+
+{const [title:=] = $props /}
+{$title===NULL ? 'NULL' : '0'}
+
+{const [title:] = $props /}
+{$title===NULL ? 'NULL' : '0'}
+
+{const [title:=0] = $props /}
+{$title===NULL ? 'NULL' : '0'}
