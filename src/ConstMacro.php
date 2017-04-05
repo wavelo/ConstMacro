@@ -2,9 +2,11 @@
 
 use Latte\MacroNode;
 use Latte\PhpWriter;
+use Latte\Helpers;
 use Latte\Macros\MacroSet;
 use Latte\Macros\CoreMacros;
 use ConstMacro\Parser;
+use Latte\CompileException;
 
 
 /**
@@ -53,13 +55,13 @@ class ConstMacro extends MacroSet
 			return $parser->expr;
 		}
 
-		$node->openingCode .= $writer->write("<?php \$_l->compacts[] = call_user_func_array('compact', %var) + %var; %raw ?>",
+		$node->openingCode .= $writer->write("<?php \$this->global->compacts[] = call_user_func_array('compact', %var) + %var; %raw ?>",
 			$parser->compact,
 			array_fill_keys($parser->compact, NULL),
 			$parser->expr
 		);
 
-		$node->closingCode .= "<?php extract(array_pop(\$_l->compacts)); ?>";
+		$node->closingCode .= "<?php extract(array_pop(\$this->global->compacts)); ?>";
 	}
 
 
@@ -73,27 +75,33 @@ class ConstMacro extends MacroSet
 			\s+as\s+
 			(?P<key>\\$[a-z][a-z0-9_]*\s*=>\s*)?
 			((?P<props>\\$[a-z][a-z0-9_]*),\s*)?
-			(?P<const>\[.*\])
+			(?P<const>\[.*\])\s*
+			(?P<modifiers>\|[^\]]+)?
 		\s*$#xsi', $node->args, $matches);
 
 		if (empty($result)) {
 			return self::$coreMacros->macroEndForeach($node, $writer);
 		}
 
+		if ($node->modifiers || !empty($matches['modifiers'])) {
+			throw new CompileException('No modifier is allowed here.');
+		}
+
 		$props = $matches['props'] ?: uniqid('$tmp_');
 		$parser = Parser::parse("$matches[const] = $props");
 
-		$node->openingCode = $writer->write(
-			'<?php $_l->compacts[] = call_user_func_array("compact", %var) + %var;'
-			. '$iterations = 0; foreach ($iterator = $_l->its[] = '
-			. 'new Latte\Runtime\CachingIterator(%raw) as %raw %raw) { %raw ?>',
+		$node->openingCode .= $writer->write(
+			'<?php '
+			. '$this->global->compacts[] = call_user_func_array("compact", %var) + %var;'
+			. '$iterations = 0; foreach ($iterator = $this->global->its[] = '
+			. 'new LR\CachingIterator(%raw) as %raw %raw) { %raw ?>',
 			$parser->compact,
 			array_fill_keys($parser->compact, NULL),
 			$matches['iterator'], $matches['key'], $props,
 			$parser->expr
 		);
 
-		$node->closingCode = '<?php $iterations++; } extract(array_pop($_l->compacts)); array_pop($_l->its); $iterator = end($_l->its) ?>';
+		$node->closingCode = '<?php $iterations++; } extract(array_pop($this->global->compacts)); array_pop($this->global->its); $iterator = end($this->global->its) ?>';
 	}
 
 }
