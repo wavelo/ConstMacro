@@ -55,7 +55,7 @@ class ConstMacro extends MacroSet
 			return $parser->expr;
 		}
 
-		$node->openingCode .= $writer->write("<?php \$this->global->compacts[] = call_user_func_array('compact', %var) + %var; %raw ?>",
+		$node->openingCode .= $writer->write("<?php \$this->global->compacts[] = @call_user_func_array('compact', %var) + %var; %raw ?>",
 			$parser->compact,
 			array_fill_keys($parser->compact, NULL),
 			$parser->expr
@@ -92,12 +92,13 @@ class ConstMacro extends MacroSet
 
 		$node->openingCode .= $writer->write(
 			'<?php '
-			. '$this->global->compacts[] = call_user_func_array("compact", %var) + %var;'
+			. '$this->global->compacts[] = @call_user_func_array("compact", %var) + %var;'
 			. '$iterations = 0; foreach ($iterator = $this->global->its[] = '
 			. 'new LR\CachingIterator(%raw) as %raw %raw) { %raw ?>',
 			$parser->compact,
 			array_fill_keys($parser->compact, NULL),
-			$matches['iterator'], $matches['key'], $props,
+			preg_replace('#^(.*)\s+as\s+.*$#i', '$1', $writer->formatArgs()),
+			$matches['key'], $props,
 			$parser->expr
 		);
 
